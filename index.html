@@ -19,6 +19,255 @@
 </head>
 <body>
 	<canvas id="glitch"></canvas>
-	<script type="text/javascript" src="script.js"></script>
+	<script type="text/javascript">
+		var canvas = document.getElementById('glitch');
+		var context = canvas.getContext('2d');
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
+
+		var player = new Player();
+		var border = new Border();
+		var obs = [];
+		var pressCkeck = false;
+
+		setInterval(world,30);
+		generateObs(40);
+
+		window.addEventListener("keypress", function(e){
+			if (e.keyCode >= 49 && e.keyCode <= 49+(player.hands).length-1
+				&& !pressCkeck) {
+				player.glitchTo(e.keyCode-49);
+				pressCkeck = true;
+			}
+		});
+
+		function generateObs(count) {
+			for (var i = 0; i < count; i++) obs.push(new Obstacle());
+		}
+
+		function clearCanvas() {
+			context.fillStyle = "#000";
+			context.fillRect(0,0,canvas.width,canvas.height);
+		}
+
+		function randomBetween(min,max) {
+			return Math.floor((Math.random()*(max - min)+min));
+		}
+
+		function world() {
+			clearCanvas();
+			if (pressCkeck) pressCkeck = false;
+			border.update().draw();
+			for (var i = 0; i < obs.length; i++) obs[i].update().draw();
+			player.update().draw();
+		}
+
+		function Player() {
+			this.x = canvas.width/2; 
+			this.y = canvas.height/2;
+
+			this.handGap = 50;
+			this.radius = 25;
+
+			this.generateHands = function() {
+				this.hands = [];
+				for (var i = 0; i < 4; i++) {
+					(this.hands).push(new Hand(this.handGap*(i+1)));
+				}
+			}; this.generateHands();
+
+			this.glitchTo = function(i) {
+				if ((this.hands)[i].x - this.radius > border.xgap &&
+					(this.hands)[i].y - this.radius > border.ygap &&
+					(this.hands)[i].x + this.radius < canvas.width-border.xgap &&
+					(this.hands)[i].y + this.radius < canvas.height-border.ygap &&
+					!(this.hands)[i].isLoading) {
+
+					this.x = (this.hands)[i].x;
+					this.y = (this.hands)[i].y;
+					(this.hands)[i].used();
+				}
+			}
+
+			this.update = function() {
+				for (var i = 0; i < (this.hands).length; i++)
+					(this.hands)[i].update(this);
+				return this;
+			}
+
+			this.draw = function() {
+				context.strokeStyle = "#fff";
+				context.fillStyle = "#fff";
+				context.beginPath();
+				context.arc(this.x,this.y,this.radius,Math.PI*2,false);
+				context.fill();
+				
+				for (var i = 0; i < (this.hands).length; i++)
+					(this.hands)[i].draw();	
+			}
+		}
+
+		function Hand(len) {
+			this.angle = randomBetween(0,360);
+			this.speed = randomBetween(-3,3);
+			if (this.speed == 0) this.speed = 1;
+			this.op = 0;
+			this.isLoading = true;
+			this.isOut = false;
+			this.regen = 0.01;
+
+			this.checkPos = function() {
+				if (this.x - (this.p).radius < border.xgap ||
+					this.y - (this.p).radius < border.ygap ||
+					this.x + (this.p).radius > canvas.width-border.xgap ||
+					this.y + (this.p).radius > canvas.height-border.ygap) {
+					this.isOut = true;
+				}
+				else this.isOut = false;
+			}
+
+			this.used = function() {
+				this.op = 0;
+				this.isLoading = true;
+				this.speed = randomBetween(-3,3);
+				if (this.speed == 0) this.speed = 1;
+			}
+
+			this.update = function(p) {
+				this.p = p;
+				this.checkPos();
+
+				this.x = (this.p).x;
+				this.y = (this.p).y;
+				var dx = Math.cos(this.angle * (Math.PI/180)) * len;
+				var dy = Math.sin(this.angle * (Math.PI/180)) * len;
+				this.x += dx;
+				this.y += dy;
+
+				this.angle += this.speed;
+				if (this.angle >= 360) {
+					this.angle = 360 - this.angle;
+				}
+
+				if (this.isLoading) {
+					this.op+=this.regen;
+				}
+				if (this.op >= 1) {
+					this.isLoading = false;
+				}
+
+				return this;
+			}
+
+			this.draw = function() {
+				context.strokeStyle = "rgba(255,255,255,0.1)";
+				context.fillStyle = "rgba(255,255,255,"+this.op+")";
+				
+				context.beginPath();
+				context.arc(this.x,this.y,5,Math.PI*2,false);
+				context.fill();
+
+				context.beginPath();
+				context.moveTo((this.p).x,(this.p).y);
+				context.lineTo(this.x,this.y);
+				context.stroke();
+
+				if (!this.isLoading && !this.isOut) {
+					context.strokeStyle = "rgba(255,255,255,0.5)";
+					context.beginPath();
+					context.arc(this.x,this.y,(this.p).radius,Math.PI*2,false);
+					context.stroke();
+				}
+			}
+		}
+
+		function Border() {
+			this.xgap = 50;
+			this.ygap = 50;
+
+			this.update = function() {
+				return this;
+			}
+
+			this.draw = function() {
+				context.strokeStyle = "#555";
+				context.strokeRect(this.xgap,this.ygap,
+					canvas.width-this.xgap*2,canvas.height-this.ygap*2);
+
+				context.fillStyle = "rgba(0,0,0,1)";
+				context.fillRect(this.xgap,this.ygap,
+					canvas.width-this.xgap*2,canvas.height-this.ygap*2);
+			}
+		}
+
+		function Obstacle() {
+			this.x = randomBetween(canvas.width,canvas.width*2);
+			this.y = randomBetween(0,canvas.height);
+			this.radius = randomBetween(10,20);
+			this.speed = randomBetween(1,5);
+			this.minangle = 180 - randomBetween(0,90);
+			this.maxangle = 180 + randomBetween(0,90);
+			this.angle = randomBetween(this.minangle,this.maxangle);
+			this.isRightSwing = true;
+			if (randomBetween(0,2) == 0) {this.isRightSwing = false}
+
+			this.control = function(){
+				if (this.y-this.radius > canvas.height) {this.y = 0-this.radius;}
+				else if (this.y+this.radius < 0) {this.y = canvas.height+this.radius;}
+				if (this.x+this.radius < 0) {
+					this.x = canvas.width+this.radius;
+					this.y = randomBetween(0,canvas.height);
+					this.radius = randomBetween(10,20);
+				}
+			}
+
+			this.move = function() {
+				if (this.isRightSwing) {
+					this.angle--;
+					if (this.angle <= this.minangle) {this.isRightSwing = false;}
+				}
+				else if (!this.isRightSwing) {
+					this.angle++;
+					if (this.angle >= this.maxangle) {this.isRightSwing = true;}
+				}
+
+				var dx = Math.cos(this.angle * (Math.PI / 180)) * this.speed;
+		        var dy = Math.sin(this.angle * (Math.PI / 180)) * this.speed;
+
+		        this.x += dx;
+		        this.y += dy;
+			}
+
+
+			this.update = function() {
+				this.control();
+				this.move();
+				return this;
+			}
+
+			this.draw = function() {
+				context.strokeStyle = "#fff";
+				context.fillStyle = "#0f0f0f";
+
+				context.beginPath();
+				context.arc(this.x,this.y,this.radius,Math.PI*2,false);
+				context.stroke();
+				context.fill();
+			}
+		}
+
+		function Object() {
+			this.x = 1; 
+			this.y = 1;
+
+			this.update = function() {
+				return this;
+			}
+
+			this.draw = function() {
+				
+			}
+		}
+	</script>
 </body>
 </html>
