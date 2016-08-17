@@ -28,10 +28,12 @@
 		var player = new Player();
 		var border = new Border();
 		var obs = [];
+		var bar = new Bar();
 		var pressCkeck = false;
+		var connRadius = 100;
 
 		setInterval(world,30);
-		generateObs(40);
+		generateObs(100);
 
 		window.addEventListener("keypress", function(e){
 			if (e.keyCode >= 49 && e.keyCode <= 49+(player.hands).length-1
@@ -54,16 +56,45 @@
 			return Math.floor((Math.random()*(max - min)+min));
 		}
 
+		function getHypothenuse(x1,y1,x2,y2) {
+  			var x = Math.abs(x1-x2);
+  			var y = Math.abs(y1-y2);
+  			return Math.sqrt((x*x)+(y*y));
+		}
+
+		drawConnection = function() {
+			for (var i = 0; i < obs.length; i++) {
+				for (var j = i+1; j < obs.length; j++) {
+					if (getHypothenuse(
+					obs[i].x,obs[i].y,
+					obs[j].x,obs[j].y) <= connRadius) {
+						context.strokeStyle = "rgba(255,55,55,"
+					+Math.abs((getHypothenuse(
+					obs[i].x,obs[i].y,
+					obs[j].x,obs[j].y))
+					-connRadius)*(1/connRadius)+
+					")";
+						context.beginPath();
+						context.moveTo(obs[i].x,obs[i].y);
+						context.lineTo(obs[j].x,obs[j].y);
+						context.stroke();
+					}
+				}
+			}
+		}
+
 		function world() {
 			clearCanvas();
 			if (pressCkeck) pressCkeck = false;
-			border.update().draw();
 			player.update().draw();
+			drawConnection();
 			for (var i = 0; i < obs.length; i++) obs[i].update().draw();
+			bar.update().draw();
+			border.update().draw();
 		}
 
 		function Player() {
-			this.x = canvas.width/2; 
+			this.x = canvas.width/4; 
 			this.y = canvas.height/2;
 
 			this.handGap = 50;
@@ -180,7 +211,6 @@
 				this.x += dx;
 				this.y += dy;
 
-				// if ((this.p).hands[(this.p).morphIndex] != this) this.angle += this.speed;
 				if (!(this.p).isMorphing) this.angle += this.speed;
 
 				if (this.angle >= 360) {
@@ -198,13 +228,15 @@
 			}
 
 			this.draw = function() {
-				context.strokeStyle = "rgba(255,255,255,"+this.op/3+")";
-				context.fillStyle = "rgba(255,255,255,"+this.op+")";
 
+				context.strokeStyle = "#111";
 				context.beginPath();
 				context.moveTo((this.p).x,(this.p).y);
 				context.lineTo(this.x,this.y);
 				context.stroke();
+
+				context.strokeStyle = "rgba(255,255,255,"+this.op/3+")";
+				context.fillStyle = "rgba(255,255,255,"+this.op+")";
 
 				if (!this.isLoading && !this.isOut) {
 					context.fillStyle = "rgba(0,0,0,1)";
@@ -239,17 +271,13 @@
 				context.strokeStyle = "#555";
 				context.strokeRect(this.xgap,this.ygap,
 					canvas.width-this.xgap*2,canvas.height-this.ygap*2);
-
-				context.fillStyle = "rgba(0,0,0,1)";
-				context.fillRect(this.xgap,this.ygap,
-					canvas.width-this.xgap*2,canvas.height-this.ygap*2);
 			}
 		}
 
 		function Obstacle() {
-			this.x = randomBetween(canvas.width,canvas.width*2);
+			this.x = randomBetween(canvas.width/1.5,canvas.width*1.5);
 			this.y = randomBetween(0,canvas.height);
-			this.radius = randomBetween(5,50);
+			this.radius = randomBetween(5,25);
 			this.speed = randomBetween(1,3);
 			this.minangle = 180 - randomBetween(0,45);
 			this.maxangle = 180 + randomBetween(0,45);
@@ -263,7 +291,7 @@
 				if (this.x+this.radius < 0) {
 					this.x = canvas.width+this.radius;
 					this.y = randomBetween(0,canvas.height);
-					this.radius = randomBetween(5,50);
+					this.radius = randomBetween(5,25);
 				}
 			}
 
@@ -288,17 +316,75 @@
 			this.update = function() {
 				this.control();
 				this.move();
+				if (getHypothenuse(this.x,this.y,player.x,player.y) < 
+					this.radius+player.radius) {
+					bar.deduct();
+				}
 				return this;
 			}
 
 			this.draw = function() {
-				context.strokeStyle = "#fff";
-				context.fillStyle = "#0f0f0f";
 
+				context.fillStyle = "rgba(255,0,0,1)";
 				context.beginPath();
 				context.arc(this.x,this.y,this.radius,Math.PI*2,false);
-				context.stroke();
 				context.fill();
+			}
+		}
+
+		function Bar() {
+			this.w = canvas.width/2; 
+			this.h = 3;
+			this.x = canvas.width/2 - this.w/2;
+			this.y = border.ygap - this.h/2;
+			this.progress = 0;
+			this.error = false;
+			this.message;
+			var bugVal = randomBetween(0,100);
+
+			this.deduct = function() {
+				if (this.progress > 0) this.progress-=2;
+				this.error = true;
+			}
+
+			this.setProcessMessage = function() {
+				this.message = "PROCESS... Analyzing Foreign BubbleBugx"+bugVal+" ...";
+				if (randomBetween(0,10) == 1) this.message = 
+					"PROCESS... Glitching Portals m.e."+bugVal+"% going fine...";
+			}
+
+			this.setErrorMessage = function() {
+				this.message = "ERROR... access to 04?:Jsk-66604:192.168.45.16 denied!";
+					if (randomBetween(0,20) == 1) this.message = 
+						"ERROR... BubbleBugx:66604:progress terminated";
+			}
+
+			this.update = function() {
+				if (this.progress < this.w) this.progress+=0.1;
+				if (randomBetween(0,10) == 1) bugVal = randomBetween(-100,1000);
+				return this;
+			}
+
+			this.draw = function() {
+				context.strokeStyle = "#aaa";
+				context.fillStyle = "#fff";
+				if (randomBetween(0,10)==1) this.setProcessMessage();
+				if (this.error) {
+					context.fillStyle = "#f00";
+					context.strokeStyle = "#f00";
+					this.setErrorMessage();
+				}
+				context.strokeRect(this.x,this.y,this.w,this.h);
+				context.fillRect(this.x,this.y,this.progress,this.h);
+
+				context.font = "10px Arial";
+				context.fillText(this.message,this.x,this.y-this.h);
+
+				var percentage = parseFloat(((this.progress/this.w)*100)).toFixed(5)+" %";
+				context.font = "10px Arial";
+				context.fillText(percentage,this.x+this.w-context.measureText(percentage).width,this.y-this.h);
+
+				this.error = false;
 			}
 		}
 
