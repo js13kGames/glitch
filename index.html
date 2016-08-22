@@ -31,7 +31,7 @@
 		var obs = [];
 		var bar = new Bar();
 		var pressCkeck = false;
-		var connRadius = 100;
+		var connRadius = 200;
 
 		setInterval(world,30);
 		generateObs(50);
@@ -106,7 +106,7 @@
 			this.y = canvas.height/2;
 
 			this.handGap = 50;
-			this.radius = 10;
+			this.radius = 23;
 			this.iR = this.radius;
 
 			this.isMorphing = false;
@@ -324,8 +324,8 @@
 		function Obstacle() {
 			this.x = randomBetween(canvas.width/1.5,canvas.width*1.5);
 			this.y = randomBetween(0,canvas.height);
-			this.radius = 5;
-			this.speed = randomBetween(1,4);
+			this.radius = randomBetween(5,15);
+			this.speed = randomBetween(5,10);
 			this.minangle = 180 - randomBetween(0,90);
 			this.maxangle = 180 + randomBetween(0,90);
 			this.angle = randomBetween(this.minangle,this.maxangle);
