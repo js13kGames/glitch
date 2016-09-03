@@ -34,7 +34,7 @@
 		var connRadius = 200;
 
 		setInterval(world,30);
-		generateObs(150);
+		generateObs(50);
 
 		window.addEventListener("keypress", function(e){
 			if (e.keyCode >= 49 && e.keyCode <= 49+(player.hands).length-1
@@ -102,7 +102,7 @@
 		}
 
 		function Player() {
-			this.x = canvas.width/4; 
+			this.x = canvas.width/2; 
 			this.y = canvas.height/2;
 
 			this.handGap = 50;
@@ -136,7 +136,7 @@
 				(this.hands)[i].used(this.x,this.y);
 				this.x = (this.hands)[i].swp_x;
 				this.y = (this.hands)[i].swp_y;
-				this.hands[i].isTested = true;
+				// this.hands[i].isTested = true;
 			}
 
 			this.glitchToSH = function(i) {
@@ -145,7 +145,7 @@
 					this.y = this.sHand.y;
 					this.sHand.angle = 270-360;
 					this.sHand.isLoading = true;
-					this.sHand.isTested = true;
+					// this.sHand.isTested = true;
 				}
 			}
 
@@ -201,7 +201,7 @@
 			this.op = 1;
 			this.isLoading = false;
 			this.isOut = false;
-			this.regen = 0.01;
+			this.regen = 1;
 			this.radius = 0;
 			this.iR = this.radius;
 
@@ -339,24 +339,39 @@
 		}
 
 		function Obstacle() {
-			this.x = randomBetween(canvas.width/1.5,canvas.width*1.5);
-			this.y = randomBetween(0,canvas.height);
-			this.radius = randomBetween(10,15);
-			this.speed = randomBetween(1,1);
-			this.minangle = 180 - 90;
-			this.maxangle = 180 + 90;
-			this.angle = randomBetween(this.minangle,this.maxangle);
-			this.isRightSwing = true;
-			if (randomBetween(0,2) == 0) {this.isRightSwing = false}
+			this.init = function() {
+				var type = randomBetween(0,4);
+				if (type == 0) {
+					this.x = 0;
+					this.y = randomBetween(0,canvas.height);
+				}
+				else if (type == 1) {
+					this.x = canvas.width;
+					this.y = randomBetween(0,canvas.height);
+				}
+				else if (type == 2) {
+					this.x = randomBetween(0,canvas.width);
+					this.y = 0;
+				}
+				else if (type == 3) {
+					this.x = randomBetween(0,canvas.width);
+					this.y = canvas.height;
+				}
+				this.angle = Math.atan2(this.y-player.y,this.x-player.x) * 180 / Math.PI;
+				this.minangle = this.angle - 10;
+				this.maxangle = this.angle + 10;
+
+				this.radius = randomBetween(10,15);
+				this.speed = randomBetween(1,3);
+				this.isRightSwing = true;
+				if (randomBetween(0,2) == 0) {this.isRightSwing = false}
+			}; this.init();
 
 			this.control = function(){
-				if (this.y-this.radius > canvas.height) {this.y = 0-this.radius;}
-				else if (this.y+this.radius < 0) {this.y = canvas.height+this.radius;}
-				if (this.x+this.radius < 0) {
-					this.x = canvas.width+this.radius;
-					// this.y = randomBetween(0,canvas.height);
-					// this.radius = randomBetween(5,25);
-				}
+				if 		(this.y-this.radius > canvas.height)	this.init();
+				else if (this.y+this.radius < 0) 				this.init();
+				else if (this.x-this.radius > canvas.width) 	this.init();
+				else if (this.x+this.radius < 0) 				this.init();
 			}
 
 			this.move = function() {
@@ -372,8 +387,8 @@
 				var dx = Math.cos(this.angle * (Math.PI / 180)) * this.speed;
 		        var dy = Math.sin(this.angle * (Math.PI / 180)) * this.speed;
 
-		        this.x += dx;
-		        this.y += dy;
+		        this.x -= dx;
+		        this.y -= dy;
 			}
 
 
@@ -451,19 +466,6 @@
 				context.fillText(percentage,this.x+this.w-context.measureText(percentage).width,this.y-this.h);
 
 				this.error = false;
-			}
-		}
-
-		function Object() {
-			this.x = 1; 
-			this.y = 1;
-
-			this.update = function() {
-				return this;
-			}
-
-			this.draw = function() {
-				
 			}
 		}
 	</script>
