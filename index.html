@@ -16,15 +16,21 @@
 			display: block;
 			cursor: crosshair;
 		}
+		audio {
+			display: none;
+		}
 	</style>
 </head>
 <body>
+	<!-- <audio src="../GAMING/audio1.mp3" autoplay></audio> -->
 	<canvas id="glitch"></canvas>
 	<script type="text/javascript">
 		var canvas = document.getElementById('glitch');
 		var context = canvas.getContext('2d');
 		canvas.width = window.innerWidth;
 		canvas.height = window.innerHeight;
+
+		var SECTION = 1;
 
 		var player = new Player();
 		var border = new Border();
@@ -33,8 +39,26 @@
 		var pressCkeck = false;
 		var connRadius = 200;
 
-		setInterval(world,30);
 		generateObs(50);
+		setInterval(world,30);
+		for (var i = 0; i < obs.length; i++) {
+			obs[i].x = randomBetween(0,canvas.width);
+			obs[i].y = randomBetween(0,canvas.height);
+		}
+
+
+		window.addEventListener("click", function(e){
+			SECTION++;
+			if (SECTION == 4) SECTION = 1;
+
+			if (SECTION == 3) {
+				obs = [];
+				player = new Player();
+				border = new Border();
+				bar = new Bar();
+				generateObs(50);
+			}
+		});
 
 		window.addEventListener("keypress", function(e){
 			if (e.keyCode >= 49 && e.keyCode <= 49+(player.hands).length-1
@@ -70,7 +94,7 @@
   			return Math.sqrt((x*x)+(y*y));
 		}
 
-		drawConnection = function() {
+		function drawConnection() {
 			for (var i = 0; i < obs.length; i++) {
 				for (var j = i+1; j < obs.length; j++) {
 					if (getHypothenuse(
@@ -93,12 +117,147 @@
 
 		function world() {
 			clearCanvas();
-			if (pressCkeck) pressCkeck = false;
-			player.update().draw();
-			drawConnection();
-			for (var i = 0; i < obs.length; i++) obs[i].update().draw();
-			bar.update().draw();
-			border.update().draw();
+			if (SECTION == 1) {
+				drawConnection();
+				for (var i = 0; i < obs.length; i++) obs[i].update().draw();
+				drawLogo();
+				drawClickText("Start ~:>");
+			}
+			else if (SECTION == 2) {
+				drawConnection();
+				for (var i = 0; i < obs.length; i++) obs[i].update().draw();
+				drawClickText("Clean Your Device :_User_");
+				drawInstructions();
+			}
+			else if (SECTION == 3) {
+				if (pressCkeck) pressCkeck = false;
+				player.update().draw();
+				drawConnection();
+				for (var i = 0; i < obs.length; i++) obs[i].update().draw();
+				bar.update().draw();
+				border.update().draw();
+				drawClickText("Exit && kill~Device:_User_cleaning");
+			}
+		}
+
+		function drawLogo() {
+			var x = canvas.width/2;
+			var y = canvas.height/2;
+
+			context.lineWidth = 5;
+			context.lineCap = "round";
+			context.shadowBlur = 30;
+
+			context.beginPath();
+			context.strokeStyle = "#0f0";
+			context.shadowColor = '#0f0';
+			context.moveTo(x-100-10, y+10);
+			context.lineTo(x-150+10, y+10);
+			context.lineTo(x-150+10, y+40);
+			context.lineTo(x-100-10, y+40);
+			context.lineTo(x-100-10, y+10);
+			context.lineTo(x-100-10, y+60);
+			context.lineTo(x-150+10, y+60);
+			context.moveTo(x-100-10, y+40);
+			context.lineTo(x-150, y+40);
+			context.lineTo(x-150, y-10);
+			context.lineTo(x-100-10, y-10);
+			context.stroke();
+
+			context.beginPath();
+			context.strokeStyle = "#0f0";
+			context.shadowColor = '#0f0';
+			context.moveTo(x-50-10, y+40);
+			context.lineTo(x-100, y+40);
+			context.lineTo(x-100, y-10);
+			context.moveTo(x-90, y+40);
+			context.lineTo(x-90, y-10);
+			context.stroke();
+
+			context.beginPath();
+			context.strokeStyle = "#f00";
+			context.shadowColor = '#f00';
+			context.moveTo(x-50, y+40);
+			context.lineTo(x-50+40, y+40);
+			context.lineTo(x-50+20, y+40);
+			context.lineTo(x-50+20, y+25);
+			context.moveTo(x-50+20, y+15);
+			context.lineTo(x-50+15, y+15);
+			context.lineTo(x-50+15, y+5);
+			context.lineTo(x-50+25, y+5);
+			context.lineTo(x-50+25, y+15);
+			context.lineTo(x-50+20, y+15);
+			context.moveTo(x-50+20, y+5);
+			context.lineTo(x-50+20, y-10);
+			context.lineTo(x-50+40, y-10);
+			context.lineTo(x-50, y-10);
+			context.stroke();
+
+			context.beginPath();
+			context.strokeStyle = "#f00";
+			context.shadowColor = '#f00';
+			context.moveTo(x+20, y+40);
+			context.lineTo(x+20, y-10);
+			context.lineTo(x+40, y-10);
+			context.lineTo(x, y-10);
+			context.moveTo(x+20, y+15);
+			context.lineTo(x+40, y+15);
+			context.lineTo(x+0, y+15);
+			context.stroke();
+
+			context.beginPath();
+			context.strokeStyle = "#f00";
+			context.shadowColor = '#f00';
+			context.moveTo(x+85, y-10);
+			context.lineTo(x+50, y-10);
+			context.lineTo(x+50, y+40);
+			context.lineTo(x+85, y+40);
+			context.lineTo(x+60, y+40);
+			context.lineTo(x+60, y+15);
+			context.lineTo(x+85, y+15);
+			context.lineTo(x+80, y+15);
+			context.stroke();
+
+			context.beginPath();
+			context.strokeStyle = "#f00";
+			context.shadowColor = '#f00';
+			context.moveTo(x+50+50, y+40);
+			context.lineTo(x+50+50, y-10);
+			context.lineTo(x+50+50, y+15);
+			context.lineTo(x+50+85, y+15);
+			context.lineTo(x+50+85, y-10);
+			context.lineTo(x+50+85, y+40);
+			context.moveTo(x+50+75, y+15);
+			context.lineTo(x+50+75, y+40);
+			context.stroke();
+
+			context.lineWidth = 1;
+			context.shadowBlur = 0;
+		}
+
+		function drawClickText(message) {
+			context.fillStyle = "#0f0";
+			context.font = "10px Arial";
+			context.fillText("console:> Click To "+message,
+				0+20,canvas.height-20);
+		}
+
+		function drawInstructions() {
+			context.fillStyle = "#0f0";
+			context.font = "10px Arial";
+			context.fillText("console:> "+"message",0+20,20*1);
+			context.fillText("console:> "+"message",0+20,20*2);
+			context.fillText("console:> "+"message",0+20,20*3);
+			context.fillText("console:> "+"message",0+20,20*4);
+			context.fillText("console:> "+"message",0+20,20*5);
+			context.fillText("console:> "+"message",0+20,20*6);
+			context.fillText("console:> "+"message",0+20,20*7);
+			context.fillText("console:> "+"message",0+20,20*8);
+			context.fillText("console:> "+"message",0+20,20*9);
+			context.fillText("console:> "+"message",0+20,20*10);
+			context.fillText("console:> "+"message",0+20,20*11);
+			context.fillText("console:> "+"message",0+20,20*12);
+			context.fillText("console:> "+"message",0+20,20*13);
 		}
 
 		function Player() {
@@ -172,14 +331,16 @@
 				for (var i = 0; i < (this.hands).length; i++)
 					(this.hands)[i].draw();	
 				
-				context.strokeStyle = "#0f0";
-				context.fillStyle = "#000";
+				context.shadowBlur = 20;
+				context.shadowColor = "#0f0";
+				context.strokeStyle = "#000";
 				context.beginPath();
 				context.arc(this.x,this.y,this.iR,Math.PI*2,false);
-				context.fill();
 				context.stroke();
+				context.shadowBlur = 0;
 
-				context.strokeStyle = "#111";
+				context.strokeStyle = "#0f0";
+				if (this.sHand.isLoading) context.strokeStyle = "#111";
 				context.beginPath();
 				context.moveTo(this.x,this.y);
 				context.lineTo(this.sHand.x,this.sHand.y);
@@ -201,7 +362,7 @@
 			this.op = 1;
 			this.isLoading = false;
 			this.isOut = false;
-			this.regen = 1;
+			this.regen = 0.01;
 			this.radius = 0;
 			this.iR = this.radius;
 
@@ -260,15 +421,15 @@
 			}
 
 			this.draw = function() {
-
-				context.strokeStyle = "#111";
+				context.shadowBlur = 20;
+				context.shadowColor = "#0f0";
+				context.strokeStyle = "rgba(0,255,0,"+this.op/3+")";
+				context.fillStyle = "rgba(0,255,0,"+this.op+")";
+				
 				context.beginPath();
 				context.moveTo((this.p).x,(this.p).y);
 				context.lineTo(this.x,this.y);
 				context.stroke();
-
-				context.strokeStyle = "rgba(0,255,0,"+this.op/3+")";
-				context.fillStyle = "rgba(0,255,0,"+this.op+")";
 
 				if (!this.isLoading && !this.isOut) {
 					context.fillStyle = "rgba(0,0,0,1)";
@@ -292,47 +453,52 @@
 					context.font = "10px Arial";
 					context.fillText(this.message,this.x-2.5,this.y+3);
 				}
+				context.shadowBlur = 0;
 			}
 		}
 
 		function SpecialHand(r) {
 			this.x; this.y; this.radius = r;
-			this.regen = 1;
+			this.regen = 3;
 			this.angle = 270-1;
 			this.isLoading = false;
 			this.message = "space";
-			this.isTested = false;
 			this.update = function() {
-				if (this.isLoading) this.angle+=this.regen;
+				if (this.isLoading) {
+					this.message = parseFloat(((this.angle+90)/360)*100).toFixed(2)+"%";
+					this.angle+=this.regen;
+				}
 				if (this.angle >= 270-1) {
+					this.message = "space";
 					this.angle = 270-1;
 					this.isLoading = false;
 				}
 			}
 			this.draw = function() {
-				context.strokeStyle = "rgba(0,255,0,1)";
+				context.shadowBlur = 20;
+				context.fillStyle = "#000";
 				context.beginPath();
 				context.arc(this.x,this.y,this.radius,270*(Math.PI/180),this.angle*(Math.PI/180));
-				context.stroke();
+				context.fill();
+				context.shadowBlur = 0;
 
-				if (!this.isTested) {
-					context.fillStyle = "#fff";
-					context.font = "10px Arial";
-					context.fillText(this.message,this.x-13,this.y-25);
-				}
+				context.fillStyle = "#fff";
+				context.font = "10px Arial";
+				context.fillText(this.message,this.x-13,this.y-25);
 			}
 		}
 
 		function Border() {
-			this.xgap = 0;
-			this.ygap = 50;
+			this.xgap = -5;
+			this.ygap = -5;
+			this.color = "#090";
 
 			this.update = function() {
 				return this;
 			}
 
 			this.draw = function() {
-				context.strokeStyle = "#555";
+				context.strokeStyle = this.color;
 				context.strokeRect(this.xgap,this.ygap,
 					canvas.width-this.xgap*2,canvas.height-this.ygap*2);
 			}
@@ -340,7 +506,7 @@
 
 		function Obstacle() {
 			this.init = function() {
-				var type = randomBetween(0,4);
+				var type = randomBetween(0,2);
 				if (type == 0) {
 					this.x = 0;
 					this.y = randomBetween(0,canvas.height);
@@ -349,20 +515,20 @@
 					this.x = canvas.width;
 					this.y = randomBetween(0,canvas.height);
 				}
-				else if (type == 2) {
-					this.x = randomBetween(0,canvas.width);
-					this.y = 0;
-				}
-				else if (type == 3) {
-					this.x = randomBetween(0,canvas.width);
-					this.y = canvas.height;
-				}
+				// else if (type == 2) {
+				// 	this.x = randomBetween(0,canvas.width);
+				// 	this.y = 0;
+				// }
+				// else if (type == 3) {
+				// 	this.x = randomBetween(0,canvas.width);
+				// 	this.y = canvas.height;
+				// }
 				this.angle = Math.atan2(this.y-player.y,this.x-player.x) * 180 / Math.PI;
-				this.minangle = this.angle - 10;
-				this.maxangle = this.angle + 10;
+				this.minangle = this.angle - randomBetween(40,50);
+				this.maxangle = this.angle + randomBetween(40,50);
 
-				this.radius = randomBetween(10,15);
-				this.speed = randomBetween(1,3);
+				this.radius = randomBetween(20,25);
+				this.speed = randomBetween(3,5);
 				this.isRightSwing = true;
 				if (randomBetween(0,2) == 0) {this.isRightSwing = false}
 			}; this.init();
@@ -391,7 +557,6 @@
 		        this.y -= dy;
 			}
 
-
 			this.update = function() {
 				this.control();
 				this.move();
@@ -403,13 +568,13 @@
 			}
 
 			this.draw = function() {
-
-				context.strokeStyle = "rgba(255,0,0,1)";
-				context.fillStyle = "rgba(255,155,155,0.5)";
+				context.shadowBlur = 20;
+				context.shadowColor = "#f00";
+				context.fillStyle = "rgba(0,0,0,1)";
 				context.beginPath();
 				context.arc(this.x,this.y,this.radius,Math.PI*2,false);
-				context.stroke();
 				context.fill();
+				context.shadowBlur = 0;
 			}
 		}
 
@@ -417,32 +582,32 @@
 			this.w = canvas.width/2; 
 			this.h = 5;
 			this.x = canvas.width/2 - this.w/2;
-			this.y = border.ygap - this.h/2;
+			this.y = 40;
 			this.progress = 0;
+			this.speed = 0.5;
 			this.error = false;
 			this.message;
 			var bugVal = randomBetween(0,100);
 
 			this.deduct = function() {
-				if (this.progress > 0) this.progress = 0;
+				if (this.progress > 0) this.progress*=(98/100);
 				this.error = true;
 			}
 
 			this.setProcessMessage = function() {
-				this.message = "PROCESS... Analyzing Foreign BubbleBugx"+bugVal+" ...";
-				if (randomBetween(0,10) == 1) this.message = 
-					"PROCESS... Glitching Portals m.e."+bugVal+"% going fine...";
+				this.message = "PROCESS... Analyzing red~BubbleBugx"+bugVal+" ...";
+				border.color = "#090";
 			}
 
 			this.setErrorMessage = function() {
-				this.message = "ERROR... access to 04?:Jsk-66604:192.168.45.16 denied!";
-					if (randomBetween(0,20) == 1) this.message = 
-						"ERROR... BubbleBugx:66604:progress terminated";
+				this.message = "ERROR... access to inst!:bug~BubbleBugx denied! "+bugVal;
+				border.color = "#900";
 			}
 
 			this.update = function() {
-				if (this.progress < this.w) this.progress+=0.1;
+				if (this.progress < this.w) this.progress+=this.speed;
 				if (randomBetween(0,10) == 1) bugVal = randomBetween(-100,1000);
+				if (this.progress >= this.w) SECTION = 1;
 				return this;
 			}
 
