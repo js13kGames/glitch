@@ -39,6 +39,27 @@
 		var pressCkeck = false;
 		var connRadius = 200;
 
+		var messages = 
+		[
+			"detected: bubble_16: ~glitch;",
+			". . . mission",
+			"terminate: running program with glitch -",
+			"to save( computer.user.you );",
+			". . . controls",
+			"User has no way to sovle this fatal glitch but to kill it using another glitch;",
+			"initialize: GGC ( Green Glitch Code ) algorithm! . . . done!",
+			"move the Green Glitch Code bubble to avoid contact with the red glitch bubbles;",
+			"  command: ( 1 or 2 or 3 or 4 )...",
+			"        ...action: glitch through your glitching ports;",
+			"        ...specs: ascii:49,50,51,52 - hex:31,32,33,34;",
+			"  command: ( space-bar )...",
+			"        ...action: glitch through special port:( current_cursor_position );",
+			"        ...specs: ascii:32 - hex:20;",
+			"user.you.life depends on this;",
+			"but !forget(toEnjoy);",
+			":)",
+		]
+
 		generateObs(50);
 		setInterval(world,30);
 		for (var i = 0; i < obs.length; i++) {
@@ -49,9 +70,9 @@
 
 		window.addEventListener("click", function(e){
 			SECTION++;
-			if (SECTION == 4) SECTION = 1;
+			if (SECTION == 3) SECTION = 1;
 
-			if (SECTION == 3) {
+			if (SECTION == 2) {
 				obs = [];
 				player = new Player();
 				border = new Border();
@@ -80,7 +101,7 @@
 		}
 
 		function clearCanvas() {
-			context.fillStyle = "#000";
+			context.fillStyle = "#0a0a0a";
 			context.fillRect(0,0,canvas.width,canvas.height);
 		}
 
@@ -121,22 +142,17 @@
 				drawConnection();
 				for (var i = 0; i < obs.length; i++) obs[i].update().draw();
 				drawLogo();
-				drawClickText("Start ~:>");
+				drawInstructions();
+				drawClickText("START process ~:>");
 			}
 			else if (SECTION == 2) {
-				drawConnection();
-				for (var i = 0; i < obs.length; i++) obs[i].update().draw();
-				drawClickText("Clean Your Device :_User_");
-				drawInstructions();
-			}
-			else if (SECTION == 3) {
 				if (pressCkeck) pressCkeck = false;
 				player.update().draw();
 				drawConnection();
 				for (var i = 0; i < obs.length; i++) obs[i].update().draw();
 				bar.update().draw();
 				border.update().draw();
-				drawClickText("Exit && kill~Device:_User_cleaning");
+				drawClickText("EXIT && terminate~Device:_User_cleaning");
 			}
 		}
 
@@ -244,20 +260,10 @@
 
 		function drawInstructions() {
 			context.fillStyle = "#0f0";
-			context.font = "10px Arial";
-			context.fillText("console:> "+"message",0+20,20*1);
-			context.fillText("console:> "+"message",0+20,20*2);
-			context.fillText("console:> "+"message",0+20,20*3);
-			context.fillText("console:> "+"message",0+20,20*4);
-			context.fillText("console:> "+"message",0+20,20*5);
-			context.fillText("console:> "+"message",0+20,20*6);
-			context.fillText("console:> "+"message",0+20,20*7);
-			context.fillText("console:> "+"message",0+20,20*8);
-			context.fillText("console:> "+"message",0+20,20*9);
-			context.fillText("console:> "+"message",0+20,20*10);
-			context.fillText("console:> "+"message",0+20,20*11);
-			context.fillText("console:> "+"message",0+20,20*12);
-			context.fillText("console:> "+"message",0+20,20*13);
+			context.font = "12px Arial";
+			for (var i = 0; i < messages.length; i++) {
+				context.fillText("console:> "+messages[i],0+20,20*(i+1));
+			}
 		}
 
 		function Player() {
